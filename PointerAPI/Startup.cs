@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Pointer.Core.Models;
-using Pointer.Database.Entities;
 using Pointer.Database.Mappers;
-using Pointer.Database.Transfer;
 using PointerAPI.DbContexts;
 using PointerAPI.Services;
 
@@ -31,10 +28,22 @@ public static class Startup
                 );
             }
         );
+        builder.Services.AddDbContext<ControlObjectSectionContext>
+        (
+            options =>
+            {
+                options.UseSqlServer
+                (
+                    builder.Configuration.GetConnectionString("Pointer")
+                );
+            }
+        );
         // inject Mapper classes
         builder.Services.AddScoped<ControlObjectMapper>();
+        builder.Services.AddScoped<ControlObjectSectionMapper>();
         // inject Service layer classes
         builder.Services.AddScoped<IControlObjectService, ControlObjectService>();
+        builder.Services.AddScoped<IControlObjectSectionService, ControlObjectSectionService>();
         // return the modified WebApplicationBuilder
         return builder;
     }
@@ -46,7 +55,9 @@ public static class Startup
     public static void EnsureDatabaseConnection(IServiceScope Scope)
     {
         // create DbContexts and ensure connections
-        ControlObjectContext Context = Scope.ServiceProvider.GetRequiredService<ControlObjectContext>();
-        Context.Database.EnsureCreated();
+        ControlObjectContext _controlObjectContext = Scope.ServiceProvider.GetRequiredService<ControlObjectContext>();
+        _controlObjectContext.Database.EnsureCreated();
+        ControlObjectSectionContext _controlObjectSectionContext = Scope.ServiceProvider.GetRequiredService<ControlObjectSectionContext>();
+        _controlObjectSectionContext.Database.EnsureCreated();
     }
 }
